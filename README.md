@@ -9,12 +9,17 @@
     
 ###   Creazione dei waypoint 
     
-      cd $HOME/src/marrtino_apps/mapping
-      roslaunch gmapping.launch
+      PROGRAMMA PER LA CREAZIONE DEI WAYPOINT 
+
+      TASTO A per MEMORIZZARE WAYPOINT
+      TASTO Y per SALVARE
+
+      TASTO X PER INDICARE CHE E' ARRIVATO AL TAVOLO 
+
+      python createwaypoint.py /home/ubuntu/src/waypoint_navigation/waypoint/counter_fwd1.csv
 
        
 ###   Navigazione tramite waypoint
-       cd $HOME/src/marrtino_apps/mapping
-       roslaunch srrg_mapper.launch
+      
 
-    
+      python movetogoal.py /home/ubuntu/src/waypoint_navigation/waypoint/waypoint01.csv

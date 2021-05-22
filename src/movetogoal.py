@@ -20,6 +20,7 @@ no_of_points = 0
 path_waypoint = sys.argv[1]
 global x_point
 global y_point
+global theta_point
 
 def localizer_amcl_cb(data):
     global x_loc
@@ -41,6 +42,7 @@ def load_waypoints(path):
     global no_of_points
     global x_point
     global y_point
+    global theta_point
    
     #initialize_path_queue()
     no_of_points = 0
@@ -55,7 +57,7 @@ def load_waypoints(path):
              
             x_point.append(float(row[0]))
             y_point.append(float(row[1]))
-            theta_point.append(float(row[5]))
+            theta_point.append(float(row[2]))
             
             no_of_points += 1
   
@@ -84,6 +86,7 @@ while not rospy.is_shutdown():
     if point_index < no_of_points:  
          goal.x = x_point[point_index]
          goal.y = y_point[point_index]
+         goal.z = theta_point[point_index]
     else:
          break # I guess we're done?
 
@@ -103,8 +106,9 @@ while not rospy.is_shutdown():
             speed.angular.z = 0.0
     else:
         point_index += 1
-
-    rospy.loginfo("x {} y {}  ".format(inc_x,inc_y))
+    rospy.loginfo("x {} y {} theta {} ".format(goal.x,goal.y,goal.z))
+    rospy.loginfo("GOAL angle {} distance  {}  ".format(angle_to_goal,distance_to_goal))
+    rospy.loginfo("x {} y {} theta {} ".format(inc_x,inc_y,theta_loc))
 
     velocity_publisher.publish(speed)
     r.sleep()    

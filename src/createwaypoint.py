@@ -23,17 +23,41 @@ path_waypoint = sys.argv[1]
 global x_point
 global y_point
 global theta_point
-no_of_points = 0
+global no_of_point
+no_of_point = 0
 x_point = []
 y_point = []
 theta_point = []
 global get_waypoint 
-get_waypoint = false
+get_waypoint = False
+global save_waypoint 
+save_waypoint = False
 
 def joy_cb(data):
-    if data.buttons[0] == 1:  
-        get_waypoint = true     
+    global no_of_point
+    if data.buttons[2] == 1:  
+        get_waypoint = True 
+        x_point.append(float(x_loc))
+        y_point.append(float(y_loc))
+        theta_point.append(float(theta_loc))
+        no_of_point = no_of_point + 1
+        rospy.loginfo("Memorizzo [{}] x {} y {} theta {}".format(no_of_point,x_loc,y_loc,theta_loc))
+        get_waypoint = False
+          
 
+
+
+
+
+
+
+
+    if data.buttons[0] == 1:      
+        save_waypoint = True
+        print "inizio salvataggio"
+        write_waypoints(path_waypoint)
+        
+    #print data 
 
 
 def localizer_amcl_cb(data):
@@ -50,19 +74,23 @@ def localizer_amcl_cb(data):
 
 
 def write_waypoints(path_to_write):
-    
+     
    
    
-    with open('waypoint.csv', 'w', newline='') as file:
-        writer = csv.writer(file)
-        i=0
-        while i <= no_of_points:
-            x = x_point[i]
-            y = y_point[i]
-            t = theta_point[i]
-            writer.writerow([x, y, t])
-            i=i+1
+    with open('waypoint.csv', 'w'  ) as file:
+         
+        contatore=0
+        
+        while contatore < no_of_point:
+            x = x_point[contatore]
+            y = y_point[contatore]
+            t = theta_point[contatore]
+            file.write(str(x)+","+str(y)+","+str(t) + "\n")
+             
+            contatore = contatore +1 
 
+        file.close()
+        rospy.loginfo("Waypoint saved {}".format(no_of_point))
   
     
     return
@@ -81,14 +109,11 @@ r = rospy.Rate(4)
 
 point_index = 0
 
-
+rospy.loginfo("======================================")
+rospy.loginfo("======= Creazione dei WAYPOINT  ======")
+rospy.loginfo("======================================")
 
 while not rospy.is_shutdown():
-    
-    if get_waypoint == true:
-        x_point.append(float(x_loc))
-        y_point.append(float(y_loc))
-        theta_point.append(float(theta_loc))
-        rospy.loginfo("Memorizzo x {} y {} theta {}".format(x_loc,y_loc,theta_loc))
-
-    
+    #
+    if save_waypoint == True:
+        rospy.loginfo("Save")
