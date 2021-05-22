@@ -11,6 +11,7 @@ from math import atan2,pi
 
 from sensor_msgs.msg import Joy
 
+
  
 
 x_loc = 0.0
@@ -21,17 +22,17 @@ no_of_points = 0
 path_waypoint = sys.argv[1]
 global x_point
 global y_point
-global theta_loc
+global theta_point
 no_of_points = 0
 x_point = []
 y_point = []
-theta_loc = []
+theta_point = []
 global get_waypoint 
 get_waypoint = false
 
 def joy_cb(data):
     if data.buttons[0] == 1:  
-        get_waypoint = true      # 
+        get_waypoint = true     
 
 
 
@@ -46,32 +47,24 @@ def localizer_amcl_cb(data):
     euler = tf.transformations.euler_from_quaternion(q)
     theta_loc = euler[2] #  theta
 
-def initialize_path_queue(self):
-    global waypoints
-    waypoints = [] # the waypoint queue
 
-def load_waypoints(path):
-    global waypoints
-    global no_of_points
-    global x_point
-    global y_point
-   
-    #initialize_path_queue()
+
+def write_waypoints(path_to_write):
     
-    theta_point = []
-    #path_way = np.empty(shape=[0, n])     
-    with open(path) as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
-        for row in readCSV:
-           
-             
-            x_point.append(float(row[0]))
-            y_point.append(float(row[1]))
-            theta_point.append(float(row[5]))
-            
-            no_of_points += 1
+   
+   
+    with open('waypoint.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        i=0
+        while i <= no_of_points:
+            x = x_point[i]
+            y = y_point[i]
+            t = theta_point[i]
+            writer.writerow([x, y, t])
+            i=i+1
+
   
-    print("{} points are readed".format(no_of_points))
+    
     return
 
 rospy.init_node("createwaypoint")
