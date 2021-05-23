@@ -3,11 +3,12 @@
 import sys
 import rospy
 import csv
+import math
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Twist
 from nav_msgs.msg import Odometry
 import tf
 from geometry_msgs.msg import Point, Twist
-from math import atan2,pi
+from math import atan2,pi,pow
 import numpy as np
 
  
@@ -63,7 +64,31 @@ def load_waypoints(path):
   
     print("{} points are readed".format(no_of_points))
     return
+# Angle functions
 
+def DEG2RAD(a):
+    return a*math.pi/180.0
+
+def RAD2DEG(a):
+    return a/math.pi*180.0
+
+def NORM_180(a):
+    if (a>180):
+        return a-360
+    elif (a<-180):
+        return a+360
+    else:
+        return a
+
+
+def NORM_PI(a):
+    if (a>math.pi):
+        return a-2*math.pi
+    elif (a<-math.pi):
+        return a+2*math.pi
+    else:
+        return a
+        
 rospy.init_node("movetogoal")
 
  
@@ -98,17 +123,43 @@ while not rospy.is_shutdown():
     distance_to_goal = np.sqrt(inc_x*inc_x + inc_y*inc_y)
     
     if distance_to_goal >= 0.3: #  
-        if abs(angle_to_goal - theta_loc) > 0.1:
+        delta = RAD2DEG(abs(angle_to_goal - theta_loc))
+        r_angle_to_goal = NORM_180(RAD2DEG(angle_to_goal))
+        r_theta_loc = NORM_180(RAD2DEG(theta_loc))
+        delta2 = abs(r_angle_to_goal - r_theta_loc)
+
+        #print  RAD2DEG(angle_to_goal), RAD2DEG(theta_loc), delta ,delta > 10,r_angle_to_goal,r_theta_loc,delta2
+        #if delta < 0:
+           #delta = abs(angle_to_goal) - theta_loc
+        if delta > 10:  # gradi
+           
             speed.linear.x = 0.0
-            speed.angular.z = 0.3
+            if abs(angle_to_goal  > theta_loc ):
+                if delta >= 180:
+                    speed.angular.z = -0.3
+                    print "Giro >>>> (2 )>=180"
+                else:
+                    speed.angular.z = 0.3
+                    print "Giro <<<< (2 )<180"
+            else:
+                if delta >= 180:
+                    speed.angular.z = 0.3
+                    print "Giro <<<< >=180"
+                else:
+                    speed.angular.z = -0.3
+                    print "Giro >>>> <180"
         else:
-            speed.linear.x = 0.5
+            speed.linear.x = 0.5*10
             speed.angular.z = 0.0
     else:
         point_index += 1
-    rospy.loginfo("x {} y {} theta {} ".format(goal.x,goal.y,goal.z))
-    rospy.loginfo("GOAL angle {} distance  {}  ".format(angle_to_goal,distance_to_goal))
-    rospy.loginfo("x {} y {} theta {} ".format(inc_x,inc_y,theta_loc))
+        rospy.loginfo("NEW GOAL NEW GOAL -------------------------------")
+        rospy.loginfo("GOAL x {} y  {} theta {}".format(goal.x,goal.y,goal.z))
+        rospy.loginfo("NEW GOAL NEW GOAL -------------------------------")
+
+    
+    #rospy.loginfo("GOAL angle {} dist {} theta {} delta  {}   POSITION x {} y {} ".format(angle_to_goal,distance_to_goal,theta_loc,angle_to_goal - theta_loc,inc_x,inc_y))
+   
 
     velocity_publisher.publish(speed)
     r.sleep()    

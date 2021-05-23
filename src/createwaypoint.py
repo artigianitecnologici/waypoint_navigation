@@ -77,7 +77,7 @@ def write_waypoints(path_to_write):
      
    
    
-    with open('waypoint.csv', 'w'  ) as file:
+    with open(path_waypoint, 'w'  ) as file:
          
         contatore=0
         
