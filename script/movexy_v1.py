@@ -18,7 +18,7 @@ from nav_msgs.msg import Odometry
 
  
 VEL_ANGOLARE = 0.3
-VEL_LINEARE = 0.8
+VEL_LINEARE = 0.4
 ANGLE_TOLERANCE  = 20
 DISTANCE_TOLERANCE  = 0.35 #
         
@@ -37,7 +37,7 @@ class MarrtinoBot:
         self.pose_subscriber = rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped ,self.localizer_amcl_cb)
         self.status_publisher = rospy.Publisher('/status',String, queue_size=10)
         self.ready_subscriber = rospy.Subscriber('/ready', String ,self.ready_cb)
-        self.laser_sub = rospy.Subscriber('/base_scan', LaserScan, self.laser_cb)
+        self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_cb)
 
         self.pose = Pose()
         self.rate = rospy.Rate(10)
@@ -105,7 +105,7 @@ class MarrtinoBot:
          
         else:
             if delta <= 180:
-                speed_angular = -VEL_ANGOLARE
+                speed_angular = -speed_angular
 
         return  speed_angular    
 
