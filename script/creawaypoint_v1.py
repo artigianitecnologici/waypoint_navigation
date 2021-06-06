@@ -31,7 +31,7 @@ y_point = []
 theta_point = []
 is_table = []
 global get_waypoint 
-get_waypoint = True
+get_waypoint = False
 global save_waypoint 
 save_waypoint = False
 
@@ -40,14 +40,15 @@ def joy_cb(data):
     # set waypoint
     if data.buttons[2] == 1:  
         # Verificare che non venga inserito piu' volte lo stesso waypoint
-
+        get_waypoint = True
         x_point.append(float(x_loc))
         y_point.append(float(y_loc))
         theta_point.append(float(theta_loc))
         is_table.append(0)
         no_of_point = no_of_point + 1
         rospy.loginfo("Memorizzo [{}] x {} y {} theta {}".format(no_of_point,x_loc,y_loc,theta_loc))
-        talk("ok")
+        my_str = "%s" % no_of_point
+        talk(my_str)
         get_waypoint = False
           
     # set tavolo 
@@ -105,13 +106,15 @@ def write_waypoints(path_to_write):
     
     return
 
-rospy.init_node("createwaypoint")
+
 
  
 localizer_sub = rospy.Subscriber('/amcl_pose', PoseWithCovarianceStamped ,localizer_amcl_cb)
 joy_sub = rospy.Subscriber("/joy", Joy, joy_cb, queue_size=1)
 talk_publisher = rospy.Publisher('/talk/to_talk',String, queue_size=10)
- 
+
+rospy.init_node('creawaypoint', anonymous=True)
+rate = rospy.Rate(10) # 10hz
 
 speed = Twist()
 
@@ -123,10 +126,16 @@ point_index = 0
 rospy.loginfo("======================================")
 rospy.loginfo("======= Creazione dei WAYPOINT  ======")
 rospy.loginfo("======================================")
-talk("Creazione Waypoint")
+rospy.loginfo(" A = waypoint")
+rospy.loginfo(" Y = salva waypoint")
+rospy.loginfo(" X = set tavolo")
+rospy.loginfo("======================================")
+
 while not rospy.is_shutdown():
     #
-    
+    #if get_waypoint == True:
+    #    talk("Creo Waypoint")    
     if save_waypoint == True:
         rospy.loginfo("Save")
 
+    rate.sleep()
