@@ -136,8 +136,11 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/waypoint_navigation_node.cpp)
 
 
-add_executable(waypoint_navigation src/movexy.cpp)
-target_link_libraries(waypoint_navigation ${catkin_LIBRARIES})
+add_executable(movexy_node src/movexy.cpp)
+target_link_libraries(movexy_node ${catkin_LIBRARIES})
+
+add_executable(creawaypoint_node src/creawaypoint.cpp)
+target_link_libraries(creawaypoint_node ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

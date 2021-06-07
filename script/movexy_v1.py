@@ -75,7 +75,7 @@ class MarrtinoBot:
         self.laser_center_distance = min(data.ranges[nc-45:nc+45])
       
     def ready_cb(self,data):
-        self.status = data.data
+        self.ready = data.data
 
     def euclidean_distance(self, goal_pose):
      
@@ -127,10 +127,8 @@ class MarrtinoBot:
         
         goal_pose.x = goal_x 
         goal_pose.y = goal_y  
-        
-        
-
-        
+       
+              
         # Fase 1 rotazione 
         rospy.loginfo("fase 1 - turn ")
         delta = self.RAD2DEG(abs(self.steering_angle(goal_pose) - self.pose.theta))
@@ -146,7 +144,7 @@ class MarrtinoBot:
             self.sendMoveMsg(VEL_LINEARE,self.angular_vel2(goal_pose))
             #print "distance ",self.euclidean_distance(goal_pose)," angular ",self.angular_vel(goal_pose),va
             obstacle_laser = self.laser_center_distance
-            print "Ostacolo ",obstacle_laser
+            #print "Ostacolo ",obstacle_laser
             if obstacle_laser < 0.5:
                 self.sendMoveMsg(0,0)
                 print "stop"
@@ -169,7 +167,7 @@ class MarrtinoBot:
                 self.rate.sleep()
             self.sendMoveMsg(0, 0)
             rospy.loginfo("Attendo ok in  /ready")
-            while self.ready == "OK":
+            while self.ready <> "OK":
                 self.rate.sleep()
 
 
@@ -205,6 +203,7 @@ if __name__ == '__main__':
         x.load_waypoints(path_waypoint)
         conta=0
         while conta <= x.no_of_points:
+            print "waypoint :",conta
             x.move2goal(x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta])
             conta += 1
 

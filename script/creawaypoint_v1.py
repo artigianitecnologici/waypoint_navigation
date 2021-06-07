@@ -133,8 +133,7 @@ rospy.loginfo("======================================")
 
 while not rospy.is_shutdown():
     #
-    #if get_waypoint == True:
-    #    talk("Creo Waypoint")    
+     
     if save_waypoint == True:
         rospy.loginfo("Save")
 
