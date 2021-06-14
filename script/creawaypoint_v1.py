@@ -34,9 +34,10 @@ global get_waypoint
 get_waypoint = False
 global save_waypoint 
 save_waypoint = False
-
+global okloop 
+okloop = True # ciclo principale
 def joy_cb(data):
-    global no_of_point
+    global no_of_point,okloop
     # set waypoint
     if data.buttons[2] == 1:  
         # Verificare che non venga inserito piu' volte lo stesso waypoint
@@ -64,6 +65,8 @@ def joy_cb(data):
         print "inizio salvataggio"
         write_waypoints(path_waypoint)
         talk("salvo i waypoint")
+        okloop = False
+        talk("Fine lavoro")
         
     #print data 
 
@@ -131,10 +134,13 @@ rospy.loginfo(" Y = salva waypoint")
 rospy.loginfo(" X = set tavolo")
 rospy.loginfo("======================================")
 
-while not rospy.is_shutdown():
+while not rospy.is_shutdown() and okloop==True:
     #
      
     if save_waypoint == True:
         rospy.loginfo("Save")
-
+    
+    
+     
     rate.sleep()
+

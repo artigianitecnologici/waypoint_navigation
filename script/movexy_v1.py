@@ -202,7 +202,7 @@ if __name__ == '__main__':
         path_waypoint = sys.argv[1]
         x.load_waypoints(path_waypoint)
         conta=0
-        while conta <= x.no_of_points:
+        while conta <= x.no_of_points-1:
             print "waypoint :",conta
             x.move2goal(x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta])
             conta += 1
