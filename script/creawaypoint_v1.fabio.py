@@ -39,7 +39,7 @@ okloop = True # ciclo principale
 def joy_cb(data):
     global no_of_point,okloop
     # set waypoint
-    if data.buttons[0] == 1:  
+    if data.buttons[2] == 1:  
         # Verificare che non venga inserito piu' volte lo stesso waypoint
         get_waypoint = True
         x_point.append(float(x_loc))
@@ -52,15 +52,15 @@ def joy_cb(data):
         talk(my_str)
         get_waypoint = False
           
-    # set tavolo  X
+    # set tavolo 
     if data.buttons[3] == 1:  
         is_table[no_of_point-1] = 1
         rospy.loginfo("Set Tavolo ")
         talk("setto il tavolo")
 
 
-    # salva i waypoint Y 
-    if data.buttons[4] == 1:      
+
+    if data.buttons[0] == 1:      
         save_waypoint = True
         print "inizio salvataggio"
         write_waypoints(path_waypoint)

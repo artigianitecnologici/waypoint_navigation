@@ -20,7 +20,7 @@ from nav_msgs.msg import Odometry
 VEL_ANGOLARE = 0.3
 VEL_LINEARE = 0.4
 ANGLE_TOLERANCE  = 20
-DISTANCE_TOLERANCE  = 0.35 #
+DISTANCE_TOLERANCE  = 0.20 # Attenzione non funge se si abbassa
         
 COEFF_VEL_ANGOLARE = 1
 COEFF_VEL_LINEARE = 0.1
@@ -140,12 +140,13 @@ class MarrtinoBot:
         
         # Fase 2 forward 
         rospy.loginfo("fase 2 - forward ")
+        #print " x ",goal_x, " y ", goal_y
         while self.euclidean_distance(goal_pose) >= DISTANCE_TOLERANCE:
             self.sendMoveMsg(VEL_LINEARE,self.angular_vel2(goal_pose))
             #print "distance ",self.euclidean_distance(goal_pose)," angular ",self.angular_vel(goal_pose),va
             obstacle_laser = self.laser_center_distance
             #print "Ostacolo ",obstacle_laser
-            if obstacle_laser < 0.5:
+            if obstacle_laser < 0.3:
                 self.sendMoveMsg(0,0)
                 print "stop"
             # Publish at the desired rate.
@@ -203,7 +204,8 @@ if __name__ == '__main__':
         x.load_waypoints(path_waypoint)
         conta=0
         while conta <= x.no_of_points-1:
-            print "waypoint :",conta
+            print "waypoint :",conta 
+            
             x.move2goal(x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta])
             conta += 1
 
