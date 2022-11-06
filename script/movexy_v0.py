@@ -20,7 +20,7 @@ from nav_msgs.msg import Odometry
 VEL_ANGOLARE = 0.3 # 0.3
 VEL_LINEARE = 0.4 # 0.4
 ANGLE_TOLERANCE  = 20
-DISTANCE_TOLERANCE  = 0.20 #
+DISTANCE_TOLERANCE  = 0.35 #
         
 COEFF_VEL_ANGOLARE = 1
 COEFF_VEL_LINEARE = 0.1
@@ -75,7 +75,7 @@ class MarrtinoBot:
         self.laser_center_distance = min(data.ranges[nc-45:nc+45])
       
     def ready_cb(self,data):
-        self.ready = data.data
+        self.status = data.data
 
     def euclidean_distance(self, goal_pose):
      
@@ -146,7 +146,7 @@ class MarrtinoBot:
             self.sendMoveMsg(VEL_LINEARE,self.angular_vel2(goal_pose))
             #print "distance ",self.euclidean_distance(goal_pose)," angular ",self.angular_vel(goal_pose),va
             obstacle_laser = self.laser_center_distance
-            #print "Ostacolo ",obstacle_laser
+            print "Ostacolo ",obstacle_laser
             if obstacle_laser < 0.5:
                 self.sendMoveMsg(0,0)
                 print "stop"
@@ -169,7 +169,7 @@ class MarrtinoBot:
                 self.rate.sleep()
             self.sendMoveMsg(0, 0)
             rospy.loginfo("Attendo ok in  /ready")
-            while self.ready <> "OK":
+            while self.ready == "OK":
                 self.rate.sleep()
 
 

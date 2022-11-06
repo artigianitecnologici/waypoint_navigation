@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ------------------------
-# movexy.py
+# movexyabs.py
 # ------------------------
 import rospy
 import math
@@ -17,8 +17,8 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Twist
 from nav_msgs.msg import Odometry
 
  
-VEL_ANGOLARE = 0.3
-VEL_LINEARE = 0.4
+VEL_ANGOLARE = 0.6
+VEL_LINEARE = 0.8
 ANGLE_TOLERANCE  = 20 # 20
 DISTANCE_TOLERANCE  = 0.35 # 0.35 #
         
@@ -30,7 +30,7 @@ class MarrtinoBot:
     def __init__(self):
         # Creates a node with name 'turtlebot_controller' and make sure it is a
         # unique node (using anonymous=True).
-        rospy.init_node('movexy', anonymous=True)
+        rospy.init_node('movexyabs', anonymous=True)
 
         # Publisher which will publish to the topic '/cmd_vel'.
         self.velocity_publisher = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
@@ -200,13 +200,31 @@ if __name__ == '__main__':
     try:
         x = MarrtinoBot()
         #x.move2goal()
-        path_waypoint = sys.argv[1]
-        x.load_waypoints(path_waypoint)
-        conta=0
-        while conta <= x.no_of_points-1:
-            print "waypoint :",conta
-            x.move2goal(x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta])
-            conta += 1
+      
+        cmd  = sys.argv[1]
+        posx = float(sys.argv[2])
+        posy = float(sys.argv[3])
+        posz = float(sys.argv[4])
+        file_waypoint = sys.argv[5]
+        # publish the forward movement csv file name
+        path_waypoint =  "/home/ubuntu/src/waypoint_navigation/waypoints/"+ file_waypoint + ".csv"
+        p=0
+        if ( cmd == 'START'): 
+            x.move2goal(posx,posy,posz,0)    
+            with open(path_waypoint, 'w'  ) as file:
+                file.write(str(posx)+","+str(posy)+","+str(posz) + "," + str(p) + "\n")
+                file.close()
+
+        if ( cmd == 'GO'):
+            x.move2goal(posx,posy,posz,0)
+            with open(path_waypoint, 'a'  ) as file:
+                file.write(str(posx)+","+str(posy)+","+str(posz) + "," + str(p) + "\n")
+                file.close()
+
+        #if ( cmd == 'BACK'):
+
+        
+          
 
         x.sendMoveMsg(0,0)
        

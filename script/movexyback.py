@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ------------------------
-# movexy.py
+# movexyback.py
 # ------------------------
 import rospy
 import math
@@ -30,7 +30,7 @@ class MarrtinoBot:
     def __init__(self):
         # Creates a node with name 'turtlebot_controller' and make sure it is a
         # unique node (using anonymous=True).
-        rospy.init_node('movexy', anonymous=True)
+        
 
         # Publisher which will publish to the topic '/cmd_vel'.
         self.velocity_publisher = rospy.Publisher('/cmd_vel',Twist, queue_size=10)
@@ -38,6 +38,9 @@ class MarrtinoBot:
         self.status_publisher = rospy.Publisher('/status',String, queue_size=10)
         self.ready_subscriber = rospy.Subscriber('/ready', String ,self.ready_cb)
         self.laser_sub = rospy.Subscriber('/scan', LaserScan, self.laser_cb)
+        self.nav_status_publisher = rospy.Publisher('/nav_status',String, queue_size=10)
+        self.set_status_publisher = rospy.Subscriber('/set_status',String ,self.set_status_cb)
+        #self.nro_table_subcriber = rospy.Subscriber('/nro_table', String ,self.nro_table_cb)
 
         self.pose = Pose()
         self.rate = rospy.Rate(10)
@@ -50,6 +53,16 @@ class MarrtinoBot:
         self.is_table = []
         self.status = ""
         self.ready = ""
+        self.nro_table = 0
+
+        self.robot = -1
+
+        self.PENDING = 0
+        self.NAVIGATION = 1
+        self.ONTABLE = 2
+        self.DONE = 3
+        self.STOP = 4
+        self.CurrentStatus = -1
 
     def DEG2RAD(self,a):
         return a*math.pi/180.0
@@ -74,8 +87,17 @@ class MarrtinoBot:
         nl = len(data.ranges) - nr
         self.laser_center_distance = min(data.ranges[nc-45:nc+45])
       
+    def nro_table_cb(self,data):
+        self.nro_table = data.data
+
+
     def ready_cb(self,data):
         self.ready = data.data
+
+
+    def set_status_cb(self,data):
+        if( data.data == 'STOP'):
+            self.CurrentStatus = self.STOP
 
     def euclidean_distance(self, goal_pose):
      
@@ -107,7 +129,34 @@ class MarrtinoBot:
             if delta <= 180:
                 speed_angular = -speed_angular
 
-        return  speed_angular    
+        return  speed_angular  
+
+
+    
+    def nav_status_robot(self,nstatus): 
+        
+        nperc = (100 * nstatus ) / self.no_of_points
+        self.nav_status_publisher.publish(str(nperc))
+
+
+    def status_robot(self,status): 
+
+        self.CurrentStatus = status
+        if  (status == self.PENDING ): 
+            strStatus = "ATTESA"
+        if  (status == self.NAVIGATION ): 
+            strStatus = "NAVIGAZIONE"
+        if  (status == self.ONTABLE ): 
+            strStatus = "NAVIGAZIONE"
+        if  (status == self.DONE ): 
+            strStatus = "FINE NAVIGAZIONE"
+        if  (status == self.STOP ): 
+            strStatus = "STOP"
+             
+
+
+        self.status_publisher.publish(strStatus)
+
 
     def sendMoveMsg(self,linear,angular):
         vel_msg = Twist()
@@ -123,6 +172,7 @@ class MarrtinoBot:
 
     def move2goal(self,goal_x,goal_y,goal_z,is_table):
          
+        print "valori",goal_x,goal_y,goal_z,is_table
         goal_pose = Pose()
         
         goal_pose.x = goal_x 
@@ -171,8 +221,10 @@ class MarrtinoBot:
             while self.ready <> "OK":
                 self.rate.sleep()
 
+    #def wait_waipoint(self):
 
-
+        #hello
+    
     def load_waypoints(self,path):
      
    
@@ -189,7 +241,7 @@ class MarrtinoBot:
                 self.x_point.append(float(row[0]))
                 self.y_point.append(float(row[1]))
                 self.theta_point.append(float(row[2]))
-                self.is_table.append(float(row[3]))
+                self.is_table.append(int(row[3]))
                 # conta 
                 self.no_of_points += 1
   
@@ -198,18 +250,51 @@ class MarrtinoBot:
 
 if __name__ == '__main__':
     try:
+        
+        rospy.init_node('movexyback', anonymous=True)
+        rospy.loginfo('Move Waypoint back v.1.0')
+        rospy.loginfo('---------------------')
         x = MarrtinoBot()
-        #x.move2goal()
-        path_waypoint = sys.argv[1]
-        x.load_waypoints(path_waypoint)
-        conta=0
-        while conta <= x.no_of_points-1:
-            print "waypoint :",conta
-            x.move2goal(x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta])
-            conta += 1
+        while not rospy.is_shutdown():
+             
+            rospy.loginfo('Aspetto /go_back nomefile ')
+            rospy.loginfo('rostopic pub -1 /go_back std_msgs/String testing')
+            x.status_robot(x.PENDING)
+            data = rospy.wait_for_message('/go_back', String)
+            #if int(data.data) > 9:
+            #    rospy.logerr("Enter counter no between 1-3")
+            #    break
+            rospy.loginfo('Received file '+ data.data)
 
-        x.sendMoveMsg(0,0)
-       
+            # publish the forward movement csv file name
+            path_waypoint =  "/home/ubuntu/src/waypoint_navigation/waypoints/" + data.data + ".csv"
+         
+            rospy.loginfo(path_waypoint)
+            rospy.loginfo('publishing path')
+        
+            x.load_waypoints(path_waypoint)
+            conta= x.no_of_points-1
+
+
+            x.status_robot(x.NAVIGATION)
+            while (x.CurrentStatus == x.NAVIGATION) and (conta >= 0):
+                print "waypoint :",conta
+                print x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta]
+                x.move2goal(x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta])
+                conta -= 1
+                x.nav_status_robot( conta )
+
+
+
+            # fase di riposizionamento
+            rospy.loginfo('fase di riposizionamento')
+            
+           
+
+            x.sendMoveMsg(0,0)
+            x.status_robot(x.PENDING)
+            # 
+            rospy.loginfo('Fine Navigazione')
         
     except rospy.ROSInterruptException:
         pass

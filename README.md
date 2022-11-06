@@ -40,3 +40,25 @@
       Una volta arrivato al tavolo attende "OK" per proseguire 
 
       rostopic pub -1 /ready std_msgs/String "OK"
+
+##    
+      cd $HOME/src
+      git clone https://github.com/tork-a/roswww.git
+      cd $HOME/ros/catkin_make/src
+      ln -s $HOME/src/roswww .
+      cd ..
+      catkin_make
+ 
+## www
+
+
+# sudo ln -s /home/ubuntu/src/waypoint_navigation/www/marrwy
+
+   
+/nro_table 
+
+rostopic pub -1 /nro_table std_msgs/String "data: '01'
+
+/ready
+ 
+rostopic pub -1 /ready std_msgs/String "data: 'OK'"

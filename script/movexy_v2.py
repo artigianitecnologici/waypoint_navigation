@@ -196,7 +196,126 @@ class MarrtinoBot:
         print("{} points are readed".format(self.no_of_points))
         return
 
+
+class GetPath(State):
+    def __init__(self):
+        State.__init__(self, outcomes=['success'], input_keys=['waypoints'], output_keys=['waypoints'])
+        self.frame_id = rospy.get_param('~goal_frame_id','map')
+
+        def wait_for_path_reset():
+            """thread worker function"""
+            global waypoints
+            while not rospy.is_shutdown():
+                data = rospy.wait_for_message('/path_reset', Empty)
+                rospy.loginfo('Recieved path RESET message')
+                self.initialize_path_queue()
+                rospy.sleep(3) # Wait 3 seconds because `rostopic echo` latches
+                               # for three seconds and wait_for_message() in a
+                               # loop will see it again.
+        reset_thread = threading.Thread(target=wait_for_path_reset)
+        reset_thread.start()
+
+    def initialize_path_queue(self):
+        global waypoints
+        waypoints = [] # the waypoint queue
+ 
+    def execute(self, userdata):
+        global waypoints
+        self.initialize_path_queue()
+        self.path_ready = False
+	
+# to load points and save in array (waypoints)
+    def load_points(path):
+            global waypoints
+            
+            self.initialize_path_queue()
+            no_of_points = 0
+            
+             
+        self.no_of_points = 0
+        self.x_point = []
+        self.y_point = []
+        self.theta_point = []
+        self.is_table = []
+        #path_way = np.empty(shape=[0, n])     
+        with open(path) as csvfile:
+            readCSV = csv.reader(csvfile, delimiter=',')
+            for row in readCSV:
+                self.x_point.append(float(row[0]))
+                self.y_point.append(float(row[1]))
+                self.theta_point.append(float(row[2]))
+                self.is_table.append(float(row[3]))
+                # conta 
+                self.no_of_points += 1
+  
+            print("{} points are readed".format(no_of_points))
+            return
+
+        # Start thread to listen for when the path is ready (this function will end then)
+        def wait_for_path_ready():
+            """thread worker function"""
+            data = rospy.wait_for_message('/path_ready', Empty)
+            rospy.loginfo('Recieved path READY message')
+            self.path_ready = True
+        ready_thread = threading.Thread(target=wait_for_path_ready)
+        ready_thread.start()
+
+        topic = "/load_paths"
+        #rospy.loginfo("Waiting to recieve waypoints via Pose msg on topic %s" % topic)
+        #rospy.loginfo("To start following waypoints: 'rostopic pub /path_ready std_msgs/Empty -1'")
+
+        # Wait for published waypoints
+        while not self.path_ready:
+            try:
+                path = rospy.wait_for_message(topic, String, timeout=1)
+                load_points(path)
+                self.path_ready = True
+            except rospy.ROSException as e:
+                if 'timeout exceeded' in e.message:
+                    continue  # to check whether follow path command is given
+                else:
+                    raise e
+
+        # Path is ready! return success and move on to the next state (FOLLOW_PATH)
+        return 'success'
+
+class PathComplete(State):
+    def __init__(self):
+        State.__init__(self, outcomes=['success'])
+        self.pub = rospy.Publisher('way_cmp', String, queue_size=10)
+    def execute(self, userdata):
+        self.pub.publish("finished")
+        rospy.loginfo('###############################')
+        rospy.loginfo('##### REACHED FINISH GATE #####')
+        rospy.loginfo('###############################')
+        # azzerare getPath
+        global waypoints
+        waypoints = [] # the waypoint queue
+        return 'success'
+
 if __name__ == '__main__':
+    ospy.init_node('follow_waypoints')
+    rospy.loginfo('movexy v.2.0')
+    rospy.loginfo('---------------------')
+    sm = StateMachine(outcomes=['success'])
+
+    with sm:
+        StateMachine.add('GET_PATH', GetPath(),
+                           transitions={'success':'FOLLOW_PATH'},
+                           remapping={'waypoints':'waypoints'})
+        StateMachine.add('FOLLOW_PATH', FollowPath(),
+                           transitions={'success':'PATH_COMPLETE'},remapping={'waypoints':'waypoints'})
+                           
+        StateMachine.add('PATH_COMPLETE', PathComplete(),
+                           transitions={'success':'GET_PATH'}) # Fine 
+
+
+#
+    outcome = sm.execute()
+
+
+#eof
+    
     try:
         x = MarrtinoBot()
         #x.move2goal()
@@ -213,3 +332,25 @@ if __name__ == '__main__':
         
     except rospy.ROSInterruptException:
         pass
+
+
+
+if __name__ == "__main__":
+    rospy.init_node('follow_waypoints')
+    rospy.loginfo('Follow Waypoint v.1.0')
+    rospy.loginfo('---------------------')
+    sm = StateMachine(outcomes=['success'])
+
+    with sm:
+        StateMachine.add('GET_PATH', GetPath(),
+                           transitions={'success':'FOLLOW_PATH'},
+                           remapping={'waypoints':'waypoints'})
+        StateMachine.add('FOLLOW_PATH', FollowPath(),
+                           transitions={'success':'PATH_COMPLETE'},remapping={'waypoints':'waypoints'})
+                           
+        StateMachine.add('PATH_COMPLETE', PathComplete(),
+                           transitions={'success':'GET_PATH'}) # Fine 
+
+
+#
+    outcome = sm.execute()
