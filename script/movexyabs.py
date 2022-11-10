@@ -17,8 +17,8 @@ from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Twist
 from nav_msgs.msg import Odometry
 
  
-VEL_ANGOLARE = 0.6
-VEL_LINEARE = 0.8
+VEL_ANGOLARE = 0.3
+VEL_LINEARE = 0.4
 ANGLE_TOLERANCE  = 20 # 20
 DISTANCE_TOLERANCE  = 0.35 # 0.35 #
         

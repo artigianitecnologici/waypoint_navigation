@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # ------------------------
-# movexyback.py
+# movexy.py
 # ------------------------
 import rospy
 import math
@@ -251,48 +251,41 @@ class MarrtinoBot:
 if __name__ == '__main__':
     try:
         
-        rospy.init_node('movexyback', anonymous=True)
-        rospy.loginfo('Move Waypoint back v.1.0')
+        rospy.init_node('movexy', anonymous=True)
+        rospy.loginfo('Follow Waypoint v.1.0')
         rospy.loginfo('---------------------')
         x = MarrtinoBot()
-        if ( 1 == 1): #while not rospy.is_shutdown():
-             
-            rospy.loginfo('Aspetto /go_back nomefile ')
-            rospy.loginfo('rostopic pub -1 /go_back std_msgs/String testing')
+        #while not rospy.is_shutdown():
+        if (1==1):     
+            rospy.loginfo('Aspetto nro_table ')
             x.status_robot(x.PENDING)
-            data = rospy.wait_for_message('/go_back', String)
+            #data = rospy.wait_for_message('/nro_table', String)
             #if int(data.data) > 9:
             #    rospy.logerr("Enter counter no between 1-3")
             #    break
-            rospy.loginfo('Received file '+ data.data)
+            #rospy.loginfo('Recieved table no '+ data.data)
 
             # publish the forward movement csv file name
-            path_waypoint =  "/home/ubuntu/src/waypoint_navigation/waypoints/" + data.data + ".csv"
+            path_waypoint =  "/home/ubuntu/src/waypoint_navigation/waypoints/" + "testing.csv"
          
             rospy.loginfo(path_waypoint)
             rospy.loginfo('publishing path')
         
             x.load_waypoints(path_waypoint)
-            conta= x.no_of_points-1
-
-
+            conta=0
             x.status_robot(x.NAVIGATION)
-            while (x.CurrentStatus == x.NAVIGATION) and (conta >= 0):
+            while (x.CurrentStatus == x.NAVIGATION) and (conta <= x.no_of_points-1):
                 print "waypoint :",conta
                 print x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta]
                 x.move2goal(x.x_point[conta],x.y_point[conta],x.theta_point[conta],x.is_table[conta])
-                conta -= 1
+                conta += 1
                 x.nav_status_robot( conta )
-
-
-
             # fase di riposizionamento
             rospy.loginfo('fase di riposizionamento')
             
            
 
             x.sendMoveMsg(0,0)
-            #x.move2goal(0,0,x.theta_point[conta],x.is_table[conta])
             x.status_robot(x.STOP)
             # 
             rospy.loginfo('Fine Navigazione')
