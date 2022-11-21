@@ -1,0 +1,13 @@
+movexy.py - esegue il file contente i way point 
+
+i programmi principalmente sono 2 
+
+movexyabs.py 
+ Parametri 
+     START x y z file waypoint        -- viene lenciato all'inizio e' crea il file dei waypoint
+     GO x y z filewaypoin     -- accoda il waypoint e muove il robot
+
+
+movexyback.py 
+     rimane in attesa su /go_back
+     rostopic pub -1 /go_back std_msgs/String testing
