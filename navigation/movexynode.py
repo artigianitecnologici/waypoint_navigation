@@ -253,7 +253,9 @@ if __name__ == '__main__':
                     file.close()
 
             rospy.loginfo('fase di riposizionamento')
-            
+
+            if ( nope == "STOP"):
+                break
            
 
             #x.sendMoveMsg(0,0)
