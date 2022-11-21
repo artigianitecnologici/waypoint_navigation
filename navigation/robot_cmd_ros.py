@@ -22,7 +22,7 @@ try:
   import numpy
 except:
   print("Cannot import numpy")
-
+ 
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist, Quaternion, Pose, PoseWithCovarianceStamped
 from sensor_msgs.msg import LaserScan, Range, Image, Joy

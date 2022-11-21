@@ -16,7 +16,7 @@ from math import pow, atan2, sqrt
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseArray, Twist
 from nav_msgs.msg import Odometry
 
- 
+  
 VEL_ANGOLARE = 0.3
 VEL_LINEARE = 0.4
 ANGLE_TOLERANCE  = 20 # 20

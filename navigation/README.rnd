@@ -10,4 +10,4 @@ movexyabs.py
 
 movexyback.py 
      rimane in attesa su /go_back
-     rostopic pub -1 /go_back std_msgs/String testing
+     rostopic pub -1 /go_back std_msgs/String testing 

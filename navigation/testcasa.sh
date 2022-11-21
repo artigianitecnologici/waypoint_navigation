@@ -20,4 +20,4 @@ sleep 1
 sleep 1
 ./movexyabs.py GO 0.60 -1.0 0 testcasa
 sleep 1
-./movexyabs.py GO 0.60 -0.0 0 testcasa
+./movexyabs.py GO 0.60 -0.0 0 testcasa 

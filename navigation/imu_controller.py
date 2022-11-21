@@ -13,7 +13,7 @@ class GestureController(object):
     def init(self):
         ## Node frequency (Hz) 
         self.update_rate = 10   
-
+ 
         ## Mapping coefficient for linear velocity
         self.linear_coefficent = rospy.get_param ('linear_coefficient', 1)
         ## Mapping coefficient for angular velocity
