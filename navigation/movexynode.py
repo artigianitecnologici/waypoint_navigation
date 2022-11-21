@@ -214,33 +214,41 @@ if __name__ == '__main__':
         x.sendMoveMsg(0,0)
         while not rospy.is_shutdown():
              
-            rospy.loginfo('Aspetto pointxyz ')
+            rospy.loginfo('Aspetto Cmd,x,y,z,Nomefile ')
+            rospy.loginfo('')
             #x.status_robot(x.PENDING)
-            data = rospy.wait_for_message('/pointxyz', Twist)
+            data = rospy.wait_for_message('/go', String)
+            param = data.data
+            rospy.loginfo(param)
+            aparam = param.split(";")
+            
             #if int(data.data) > 9:
             #    rospy.logerr("Enter counter no between 1-3")
             #    break
-            rospy.loginfo('Recieved point x y z  nope ')
             # x ,y ,z
-            posx = data.linear.x 
-            posy = data.linear.y
-            posz = data.linear.z
+            
+            posx = float(aparam[1])
+            posy = float(aparam[2])
+            posz = float(aparam[3])
             # operazione
-            nope = data.angular.x
+            nope = aparam[0]
 
-            file_waypoint = "test"
+            file_waypoint = aparam[4]
+            # check
             # publish the forward movement csv file name
             path_waypoint =  "/home/ubuntu/src/waypoint_navigation/waypoints/"+ file_waypoint + ".csv"
             p=0
-            if ( nope == 2): 
+            if ( nope == "START"): 
                 x.move2goal(posx,posy,posz,0)    
                 with open(path_waypoint, 'w'  ) as file:
+                    file.write("0.0,0.0,0.0,1"+"\n")
                     file.write(str(posx)+","+str(posy)+","+str(posz) + "," + str(p) + "\n")
                     file.close()
 
-            if ( nope == 1):
+            if ( nope == "GO"):
                 x.move2goal(posx,posy,posz,0)
                 with open(path_waypoint, 'a'  ) as file:
+                    
                     file.write(str(posx)+","+str(posy)+","+str(posz) + "," + str(p) + "\n")
                     file.close()
 
@@ -248,8 +256,8 @@ if __name__ == '__main__':
             
            
 
-            x.sendMoveMsg(0,0)
-            x.status_robot(x.PENDING)
+            #x.sendMoveMsg(0,0)
+            #x.status_robot(x.PENDING)
             # 
             rospy.loginfo('Fine Navigazione')
         
