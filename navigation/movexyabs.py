@@ -64,23 +64,38 @@ class MarrtinoBot:
         while not rospy.is_shutdown() and timesteps>0:
             rate.sleep()
             timesteps -= 1
-        print "current pose gradi " ,self.pose.theta
+        
+        robot_deg = self.pose.theta
+        print "current pose gradi " ,self.RAD2DEG(robot_deg)
         #p = getRobotPose()
         # 0 = x 1 = y goal_pose.y
-        if math.fabs(target_pose.y-self.pose.y) + math.fabs(target_pose.x-self.pose.x) < 0.5:
-            return True
+        #if math.fabs(target_pose.y-self.pose.y) + math.fabs(target_pose.x-self.pose.x) < 0.5:
+        #    return True
         print ('t.y %.2f p.y %.2f  t.y %.2f p.y %.2f ' %(target_pose.y,self.pose.y,target_pose.x,self.pose.x))
         ad = math.atan2(target_pose.y-self.pose.y,target_pose.x-self.pose.x)
         th_deg = (ad-pz)*180/math.pi
-        print('ad %.2f deg %.2f ' %(ad,th_deg))
-        if math.fabs(th_deg)>30:
-            r = self.turn(th_deg)
+        print('ad %.2f th_deg %.2f ' %(ad,th_deg))
+
+        delta = th_deg-self.RAD2DEG(robot_deg)
+        print "Delta ",delta
+        if  math.fabs(delta)>30:
+            r = self.turn_ABS(th_deg,robot_deg)
 
         return r
 
-    def turn(self,deg, ref='REL', frame='odom'):
+
+    def turn_ABS(self,th_deg,robot_deg):
+
+        #robot_pose = get_robot_pose(frame)
+         
+        current_th_deg = self.RAD2DEG(robot_deg)   # deg
+        a_deg = self.NORM_180(th_deg - current_th_deg)
+        #print("Turn rel %.1f" %a_deg)
+        return self.exec_turn_REL(a_deg)
+
+    def turn_REL(self,deg, robot_deg):
         
-        deg = self.NORM_180(deg)
+        deg = self.NORM_180(robot_deg)
 
         print('turn %s %.2f frame %s' %(ref,deg,frame))
         
@@ -235,6 +250,11 @@ class MarrtinoBot:
         return atan2(goal_pose.y - self.pose.y, goal_pose.x - self.pose.x)
 
     def angular_vel2(self,goal_pose):
+        rate = rospy.Rate(10)
+        timesteps = 10
+        while not rospy.is_shutdown() and timesteps>0:
+            rate.sleep()
+            timesteps -= 1
          
         delta = self.RAD2DEG(abs(self.steering_angle(goal_pose) - self.pose.theta))
         if abs(delta) < 5:
@@ -283,13 +303,13 @@ class MarrtinoBot:
         #     delta = self.RAD2DEG(abs(self.steering_angle(goal_pose) - self.pose.theta))
         #     self.sendMoveMsg(0,self.angular_vel2(goal_pose))
         #     self.rate.sleep()
-        print('Enter your name:')
-        x = input()
+        #print('Pause ( metti un numero):')
+        #x = input()
         # Fase 2 forward 
         rospy.loginfo("fase 2 - forward ")
         count=0
         distanza = self.euclidean_distance(goal_pose)
-        while self.euclidean_distance(goal_pose) >= DISTANCE_TOLERANCE and count <=10:
+        while self.euclidean_distance(goal_pose) >= DISTANCE_TOLERANCE and count <=3:
             self.sendMoveMsg(VEL_LINEARE,self.angular_vel2(goal_pose))
             #print "distance ",self.euclidean_distance(goal_pose)
             #if distanza > self.angular_vel2(goal_pose):
